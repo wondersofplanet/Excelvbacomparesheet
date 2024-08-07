@@ -1,45 +1,49 @@
-Sub CompareSheetsLargeData()
+Sub CompareSheets()
     Dim ws1 As Worksheet, ws2 As Worksheet, ws3 As Worksheet
     Dim lastRow1 As Long, lastRow2 As Long, lastRow3 As Long
-    Dim i As Long, j As Long
+    Dim i As Long
     Dim dict As Object
-    Dim rowToCopy As Long
-    Dim data1 As Variant, data2 As Variant
+    Dim cellValue As Variant
 
     ' Set the worksheets
     Set ws1 = ThisWorkbook.Sheets("Sheet1")
     Set ws2 = ThisWorkbook.Sheets("Sheet2")
     Set ws3 = ThisWorkbook.Sheets("Sheet3")
-    
+
+    ' Initialize dictionary
+    Set dict = CreateObject("Scripting.Dictionary")
+
     ' Find the last rows in each sheet
     lastRow1 = ws1.Cells(ws1.Rows.Count, 1).End(xlUp).Row
     lastRow2 = ws2.Cells(ws2.Rows.Count, 1).End(xlUp).Row
-    
-    ' Load data into arrays
-    data1 = ws1.Range("A1:A" & lastRow1).Value
-    data2 = ws2.Range("A1:A" & lastRow2).Value
-    
-    ' Create a dictionary to store values from Sheet2
-    Set dict = CreateObject("Scripting.Dictionary")
-    
-    ' Populate the dictionary with values from Sheet2
-    For j = 1 To UBound(data2, 1)
-        dict(data2(j, 1)) = True
-    Next j
-    
+    lastRow3 = 1 ' Start at the first row in Sheet3
+
     ' Clear contents of Sheet3
     ws3.Cells.Clear
-    lastRow3 = 1 ' Start at the first row in Sheet3
-    
-    ' Loop through each row in the array from Sheet1
-    For i = 1 To UBound(data1, 1)
-        If Not dict.exists(data1(i, 1)) Then
-            ws3.Rows(lastRow3).Value = ws1.Rows(i).Value
+
+    ' Populate dictionary with values from Sheet2
+    For i = 1 To lastRow2
+        cellValue = ws2.Cells(i, 1).Value
+        If Not dict.exists(cellValue) Then
+            dict.Add cellValue, True
+        End If
+    Next i
+
+    ' Loop through each row in Sheet1
+    For i = 1 To lastRow1
+        cellValue = ws1.Cells(i, 1).Value
+        
+        ' If value not found in dictionary, copy row to Sheet3
+        If Not dict.exists(cellValue) Then
+            ws1.Rows(i).Copy Destination:=ws3.Rows(lastRow3)
             ' Highlight the row in Sheet3
             ws3.Rows(lastRow3).Interior.Color = RGB(255, 255, 0) ' Yellow highlight
             lastRow3 = lastRow3 + 1
         End If
     Next i
+    
+    ' Cleanup
+    Set dict = Nothing
     
     MsgBox "Comparison complete! Non-matching rows have been copied to Sheet3."
 End Sub
