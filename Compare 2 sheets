@@ -1,43 +1,56 @@
-Sub CompareSheets()
+Sub CompareAndCopyRows()
     Dim ws1 As Worksheet, ws2 As Worksheet, ws3 As Worksheet
-    Dim lastRow1 As Long, lastRow2 As Long, lastRow3 As Long
-    Dim i As Long, j As Long
-    Dim matchFound As Boolean
-    Dim rowToCopy As Long
-
-    ' Set the worksheets
+    Dim lastRow1 As Long, lastRow2 As Long, lastCol1 As Long, lastCol2 As Long
+    Dim i As Long, j As Long, k As Long
+    Dim rowFound As Boolean
+    Dim rng1 As Range, rng2 As Range
+    
     Set ws1 = ThisWorkbook.Sheets("Sheet1")
     Set ws2 = ThisWorkbook.Sheets("Sheet2")
     Set ws3 = ThisWorkbook.Sheets("Sheet3")
     
-    ' Find the last rows in each sheet
+    ' Find last row and column in Sheet1
     lastRow1 = ws1.Cells(ws1.Rows.Count, 1).End(xlUp).Row
-    lastRow2 = ws2.Cells(ws2.Rows.Count, 1).End(xlUp).Row
-    lastRow3 = 1 ' Start at the first row in Sheet3
+    lastCol1 = ws1.Cells(1, ws1.Columns.Count).End(xlToLeft).Column
     
-    ' Clear contents of Sheet3
+    ' Find last row and column in Sheet2
+    lastRow2 = ws2.Cells(ws2.Rows.Count, 1).End(xlUp).Row
+    lastCol2 = ws2.Cells(1, ws2.Columns.Count).End(xlToLeft).Column
+    
+    ' Clear Sheet3
     ws3.Cells.Clear
+    
+    ' Initialize row counter for Sheet3
+    k = 1
     
     ' Loop through each row in Sheet1
     For i = 1 To lastRow1
-        matchFound = False
-        
-        ' Loop through each row in Sheet2
-        For j = 1 To lastRow2
-            If ws1.Cells(i, 1).Value = ws2.Cells(j, 1).Value Then
-                matchFound = True
-                Exit For
+        ' Ignore empty rows
+        If WorksheetFunction.CountA(ws1.Rows(i)) > 0 Then
+            rowFound = False
+            ' Loop through each row in Sheet2
+            For j = 1 To lastRow2
+                ' Compare the rows
+                Set rng1 = ws1.Rows(i).Resize(1, lastCol1)
+                Set rng2 = ws2.Rows(j).Resize(1, lastCol2)
+                
+                If Application.WorksheetFunction.CountIfs(rng1, rng2) = lastCol1 Then
+                    rowFound = True
+                    Exit For
+                End If
+            Next j
+            
+            ' If row is not found in Sheet2
+            If Not rowFound Then
+                ' Highlight the row in Sheet1
+                ws1.Rows(i).Interior.Color = RGB(255, 255, 0) ' Yellow
+                
+                ' Copy the row to Sheet3
+                ws1.Rows(i).Copy Destination:=ws3.Rows(k)
+                k = k + 1
             End If
-        Next j
-        
-        ' If no match is found, copy the row to Sheet3
-        If Not matchFound Then
-            ws1.Rows(i).Copy Destination:=ws3.Rows(lastRow3)
-            ' Highlight the row in Sheet3
-            ws3.Rows(lastRow3).Interior.Color = RGB(255, 255, 0) ' Yellow highlight
-            lastRow3 = lastRow3 + 1
         End If
     Next i
     
-    MsgBox "Comparison complete! Non-matching rows have been copied to Sheet3."
+    MsgBox "Comparison complete. Rows not found in Sheet2 have been highlighted in Sheet1 and copied to Sheet3."
 End Sub
