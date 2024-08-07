@@ -3,7 +3,8 @@ Sub CompareAndCopyRows()
     Dim lastRow1 As Long, lastRow2 As Long, lastCol1 As Long, lastCol2 As Long
     Dim i As Long, j As Long, k As Long
     Dim rowFound As Boolean
-    Dim rng1 As Range, rng2 As Range
+    Dim cell1 As Range, cell2 As Range
+    Dim match As Boolean
     
     Set ws1 = ThisWorkbook.Sheets("Sheet1")
     Set ws2 = ThisWorkbook.Sheets("Sheet2")
@@ -30,11 +31,17 @@ Sub CompareAndCopyRows()
             rowFound = False
             ' Loop through each row in Sheet2
             For j = 1 To lastRow2
-                ' Compare the rows
-                Set rng1 = ws1.Rows(i).Resize(1, lastCol1)
-                Set rng2 = ws2.Rows(j).Resize(1, lastCol2)
+                match = True
+                ' Compare each cell in the row
+                For Each cell1 In ws1.Rows(i).Cells(1, 1).Resize(1, lastCol1)
+                    Set cell2 = ws2.Cells(j, cell1.Column)
+                    If cell1.Value <> cell2.Value Then
+                        match = False
+                        Exit For
+                    End If
+                Next cell1
                 
-                If Application.WorksheetFunction.CountIfs(rng1, rng2) = lastCol1 Then
+                If match Then
                     rowFound = True
                     Exit For
                 End If
