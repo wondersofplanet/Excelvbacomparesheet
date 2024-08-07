@@ -1,0 +1,34 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
+public class CsvRowComparer {
+    public static void main(String[] args) {
+        String csvFile1 = "path/to/csv1.csv";
+        String csvFile2 = "path/to/csv2.csv";
+
+        Set<String> csv2Rows = new HashSet<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(csvFile2))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                csv2Rows.add(line.trim());  // Add each row from CSV 2 to the set
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(csvFile1))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String trimmedLine = line.trim();
+                if (!csv2Rows.contains(trimmedLine)) {
+                    System.out.println("Row not found in CSV 2: " + trimmedLine);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
