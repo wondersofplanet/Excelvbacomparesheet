@@ -23,18 +23,18 @@ Sub CompareSheets()
 
     ' Populate dictionary with values from Sheet2
     For i = 1 To lastRow2
-        cellValue = ws2.Cells(i, 1).Value
-        If Not dict.exists(cellValue) Then
+        cellValue = Trim(ws2.Cells(i, 1).Value)
+        If Len(cellValue) > 0 And Not dict.exists(cellValue) Then
             dict.Add cellValue, True
         End If
     Next i
 
     ' Loop through each row in Sheet1
     For i = 1 To lastRow1
-        cellValue = ws1.Cells(i, 1).Value
+        cellValue = Trim(ws1.Cells(i, 1).Value)
         
         ' If value not found in dictionary, copy row to Sheet3
-        If Not dict.exists(cellValue) Then
+        If Len(cellValue) > 0 And Not dict.exists(cellValue) Then
             ws1.Rows(i).Copy Destination:=ws3.Rows(lastRow3)
             ' Highlight the row in Sheet3
             ws3.Rows(lastRow3).Interior.Color = RGB(255, 255, 0) ' Yellow highlight
