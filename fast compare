@@ -1,49 +1,52 @@
-Sub CompareSheets()
+Sub CompareAndHighlightOptimized()
     Dim ws1 As Worksheet, ws2 As Worksheet, ws3 As Worksheet
-    Dim lastRow1 As Long, lastRow2 As Long, lastRow3 As Long
-    Dim i As Long
     Dim dict As Object
-    Dim cellValue As Variant
+    Dim i As Long, lastRow1 As Long, lastRow2 As Long
+    Dim rng1 As Range, rng2 As Range
+    Dim key As Variant
+    Dim cell As Range
+    Dim matchFound As Boolean
 
     ' Set the worksheets
     Set ws1 = ThisWorkbook.Sheets("Sheet1")
     Set ws2 = ThisWorkbook.Sheets("Sheet2")
     Set ws3 = ThisWorkbook.Sheets("Sheet3")
-
+    
     ' Initialize dictionary
     Set dict = CreateObject("Scripting.Dictionary")
-
+    
     ' Find the last rows in each sheet
     lastRow1 = ws1.Cells(ws1.Rows.Count, 1).End(xlUp).Row
     lastRow2 = ws2.Cells(ws2.Rows.Count, 1).End(xlUp).Row
-    lastRow3 = 1 ' Start at the first row in Sheet3
-
-    ' Clear contents of Sheet3
-    ws3.Cells.Clear
-
-    ' Populate dictionary with values from Sheet2
-    For i = 1 To lastRow2
-        cellValue = Trim(ws2.Cells(i, 1).Value)
-        If Len(cellValue) > 0 And Not dict.exists(cellValue) Then
-            dict.Add cellValue, True
+    
+    ' Load data from Sheet2 into dictionary
+    For Each cell In ws2.Range("A1:A" & lastRow2)
+        If Not dict.exists(cell.Value) Then
+            dict.Add cell.Value, cell.EntireRow.Address
         End If
-    Next i
-
+    Next cell
+    
     ' Loop through each row in Sheet1
     For i = 1 To lastRow1
-        cellValue = Trim(ws1.Cells(i, 1).Value)
+        Set rng1 = ws1.Rows(i)
+        matchFound = False
         
-        ' If value not found in dictionary, copy row to Sheet3
-        If Len(cellValue) > 0 And Not dict.exists(cellValue) Then
-            ws1.Rows(i).Copy Destination:=ws3.Rows(lastRow3)
-            ' Highlight the row in Sheet3
-            ws3.Rows(lastRow3).Interior.Color = RGB(255, 255, 0) ' Yellow highlight
-            lastRow3 = lastRow3 + 1
+        ' Check if the entire row is in the dictionary
+        For Each cell In rng1.Cells
+            If Not IsEmpty(cell.Value) Then
+                If dict.exists(cell.Value) Then
+                    matchFound = True
+                    Exit For
+                End If
+            End If
+        Next cell
+        
+        ' If not found, highlight and copy to Sheet3
+        If Not matchFound Then
+            ws1.Rows(i).Interior.Color = RGB(255, 0, 0) ' Highlight row in red
+            ws3.Rows(ws3.Cells(ws3.Rows.Count, 1).End(xlUp).Row + 1).Value = rng1.Value ' Copy to Sheet3
         End If
     Next i
     
-    ' Cleanup
-    Set dict = Nothing
-    
-    MsgBox "Comparison complete! Non-matching rows have been copied to Sheet3."
+    MsgBox "Comparison complete!"
 End Sub
