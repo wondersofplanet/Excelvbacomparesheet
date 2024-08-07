@@ -4,14 +4,14 @@ Sub CompareAndCopyRows()
     Dim i As Long, j As Long, k As Long
     Dim rowFound As Boolean
     Dim cell1 As Range, cell2 As Range
-    Dim rowMatch As Boolean
-    Dim cellValue1 As String, cellValue2 As String
-    Dim r1 As Range, r2 As Range
-
+    Dim cellValue1 As Variant, cellValue2 As Variant
+    Dim match As Boolean
+    Dim col As Long
+    
     Set ws1 = ThisWorkbook.Sheets("Sheet1")
     Set ws2 = ThisWorkbook.Sheets("Sheet2")
     Set ws3 = ThisWorkbook.Sheets("Sheet3")
-
+    
     ' Find last row and column in Sheet1
     lastRow1 = ws1.Cells(ws1.Rows.Count, 1).End(xlUp).Row
     lastCol1 = ws1.Cells(1, ws1.Columns.Count).End(xlToLeft).Column
@@ -33,20 +33,22 @@ Sub CompareAndCopyRows()
             rowFound = False
             ' Loop through each row in Sheet2
             For j = 1 To lastRow2
-                rowMatch = True
+                match = True
                 ' Compare each cell in the row
-                For Each cell1 In ws1.Rows(i).Cells(1, 1).Resize(1, lastCol1)
-                    Set cell2 = ws2.Cells(j, cell1.Column)
-                    cellValue1 = CStr(cell1.Value)
-                    cellValue2 = CStr(cell2.Value)
+                For col = 1 To lastCol1
+                    cellValue1 = ws1.Cells(i, col).Value
+                    cellValue2 = ws2.Cells(j, col).Value
                     
-                    If cellValue1 <> cellValue2 Then
-                        rowMatch = False
-                        Exit For
+                    ' Skip empty columns in both sheets
+                    If Not IsEmpty(cellValue1) Or Not IsEmpty(cellValue2) Then
+                        If CStr(cellValue1) <> CStr(cellValue2) Then
+                            match = False
+                            Exit For
+                        End If
                     End If
-                Next cell1
-
-                If rowMatch Then
+                Next col
+                
+                If match Then
                     rowFound = True
                     Exit For
                 End If
