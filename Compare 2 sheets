@@ -1,0 +1,88 @@
+Sub CompareAndCopy()
+    Dim ws1 As Worksheet, ws2 As Worksheet
+    Dim ws3 As Worksheet, ws4 As Worksheet
+    Dim rng1 As Range, rng2 As Range, cell As Range
+    Dim found As Range
+    Dim lastRow1 As Long, lastRow2 As Long, nextRow3 As Long, nextRow4 As Long
+    Dim i As Long, j As Long
+    Dim isEqual As Boolean
+
+    ' Set references to the sheets
+    Set ws1 = ThisWorkbook.Sheets("Sheet1")
+    Set ws2 = ThisWorkbook.Sheets("Sheet2")
+    
+    ' Create Sheet3 and Sheet4 if they don't exist
+    On Error Resume Next
+    Set ws3 = ThisWorkbook.Sheets("Sheet3")
+    If ws3 Is Nothing Then
+        Set ws3 = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+        ws3.Name = "Sheet3"
+    End If
+    Set ws4 = ThisWorkbook.Sheets("Sheet4")
+    If ws4 Is Nothing Then
+        Set ws4 = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+        ws4.Name = "Sheet4"
+    End If
+    On Error GoTo 0
+
+    ' Clear previous content in Sheet3 and Sheet4
+    ws3.Cells.Clear
+    ws4.Cells.Clear
+
+    ' Get the last row in both sheets
+    lastRow1 = ws1.Cells(ws1.Rows.Count, "A").End(xlUp).Row
+    lastRow2 = ws2.Cells(ws2.Rows.Count, "A").End(xlUp).Row
+
+    ' Set ranges to compare
+    Set rng1 = ws1.Range("A1:A" & lastRow1)
+    Set rng2 = ws2.Range("A1:A" & lastRow2)
+
+    nextRow3 = 1 ' Initialize the row counter for Sheet3
+    nextRow4 = 1 ' Initialize the row counter for Sheet4
+
+    ' Loop through each row in Sheet1
+    For Each cell In rng1
+        isEqual = False
+        ' Check if the row in Sheet1 exists in Sheet2
+        For i = 1 To lastRow2
+            isEqual = True
+            For j = 1 To cell.EntireRow.Columns.Count
+                If ws1.Cells(cell.Row, j).Value <> ws2.Cells(i, j).Value Then
+                    isEqual = False
+                    Exit For
+                End If
+            Next j
+            If isEqual Then Exit For
+        Next i
+        
+        ' If the row in Sheet1 is not found in Sheet2, copy it to Sheet3
+        If Not isEqual Then
+            cell.EntireRow.Copy Destination:=ws3.Cells(nextRow3, 1)
+            nextRow3 = nextRow3 + 1
+        End If
+    Next cell
+
+    ' Loop through each row in Sheet2
+    For Each cell In rng2
+        isEqual = False
+        ' Check if the row in Sheet2 exists in Sheet1
+        For i = 1 To lastRow1
+            isEqual = True
+            For j = 1 To cell.EntireRow.Columns.Count
+                If ws2.Cells(cell.Row, j).Value <> ws1.Cells(i, j).Value Then
+                    isEqual = False
+                    Exit For
+                End If
+            Next j
+            If isEqual Then Exit For
+        Next i
+        
+        ' If the row in Sheet2 is not found in Sheet1, copy it to Sheet4
+        If Not isEqual Then
+            cell.EntireRow.Copy Destination:=ws4.Cells(nextRow4, 1)
+            nextRow4 = nextRow4 + 1
+        End If
+    Next cell
+
+    MsgBox "Comparison complete. Rows not found in Sheet2 are copied to 'Sheet3', and rows not found in Sheet1 are copied to 'Sheet4'."
+End Sub
