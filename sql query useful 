@@ -1,0 +1,62 @@
+To get a list of all tables along with their row counts in a PostgreSQL database, you can use the following SQL query:
+
+```sql
+SELECT 
+    schemaname || '.' || tablename AS table_name, 
+    reltuples::bigint AS row_count
+FROM 
+    pg_class c
+    JOIN pg_stat_user_tables t ON c.oid = t.relid
+ORDER BY 
+    row_count DESC;
+```
+
+### Explanation:
+- `schemaname || '.' || tablename AS table_name`: Combines the schema name and table name to get the fully qualified table name.
+- `reltuples::bigint AS row_count`: Returns an estimated number of rows in the table. Note that this is an estimate, not the exact count.
+- `pg_class` and `pg_stat_user_tables`: These are system catalog tables that store information about tables and their statistics.
+
+This query provides a quick overview of the table names and their approximate row counts. If you need an exact row count, you would have to run a `COUNT(*)` query for each table, but that can be resource-intensive on large databases.
+
+
+
+—------------
+
+
+
+To get an exact row count using `COUNT(*)` for all tables in a PostgreSQL database, you can use the following query. However, since this involves running a `COUNT(*)` on each table, it's resource-intensive and may take some time on large databases:
+
+```sql
+DO $$ 
+DECLARE 
+    r RECORD;
+BEGIN 
+    FOR r IN (SELECT schemaname, tablename FROM pg_tables WHERE schemaname NOT IN ('pg_catalog', 'information_schema')) 
+    LOOP 
+        EXECUTE 'SELECT ''' || r.schemaname || '.' || r.tablename || ''' AS table_name, COUNT(*) AS row_count FROM ' || r.schemaname || '.' || r.tablename; 
+    END LOOP; 
+END $$;
+```
+
+### Explanation:
+- This block of code iterates over each table in the database (excluding system tables) and executes a `COUNT(*)` on each one.
+- `pg_tables`: Contains all the table names in the database.
+- `DO $$ ... $$;`: The anonymous code block where we loop over the tables and perform the count.
+
+If you want to directly output the results without using a procedural approach, you could run a generated query like this:
+
+```sql
+SELECT 
+    table_name, 
+    (SELECT COUNT(*) FROM schemaname.tablename) AS row_count
+FROM 
+    information_schema.tables 
+WHERE 
+    table_schema NOT IN ('pg_catalog', 'information_schema')
+ORDER BY 
+    row_count DESC;
+```
+
+However, the procedural approach (first query) is more dynamic, as it can loop over all tables and execute the count for each one.
+
+
