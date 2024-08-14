@@ -1,0 +1,83 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+public class CsvMerger {
+
+    public static void main(String[] args) {
+        String csvAPath = "path/to/csvA.csv";
+        String csvBPath = "path/to/csvB.csv";
+        String outputCsvPath = "path/to/output.csv";
+
+        String csvAName = getFileName(csvAPath);
+        String csvBName = getFileName(csvBPath);
+
+        try {
+            Map<String, String> csvAMap = readCsvIntoMap(csvAPath);
+            Map<String, String> csvBMap = readCsvIntoMap(csvBPath);
+
+            BufferedWriter writer = new BufferedWriter(new FileWriter(outputCsvPath));
+            writer.write("Name," + csvAName + "," + csvBName + ",Comparison");
+            writer.newLine();
+
+            // Merge csvA and csvB with comparison
+            for (String key : csvAMap.keySet()) {
+                String valueA = csvAMap.get(key);
+                String valueB = csvBMap.getOrDefault(key, "doesnotexist");
+                String comparison = compareValues(valueA, valueB);
+
+                writer.write(key + "," + valueA + "," + valueB + "," + comparison);
+                writer.newLine();
+            }
+
+            // Add remaining items from csvB
+            for (String key : csvBMap.keySet()) {
+                if (!csvAMap.containsKey(key)) {
+                    String valueB = csvBMap.get(key);
+                    String comparison = compareValues("doesnotexist", valueB);
+
+                    writer.write(key + ",doesnotexist," + valueB + "," + comparison);
+                    writer.newLine();
+                }
+            }
+
+            writer.close();
+            System.out.println("CSV merged successfully!");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static Map<String, String> readCsvIntoMap(String csvPath) throws IOException {
+        Map<String, String> map = new HashMap<>();
+        BufferedReader reader = new BufferedReader(new FileReader(csvPath));
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(",");
+            if (parts.length == 2) {
+                map.put(parts[0].trim(), parts[1].trim());
+            }
+        }
+
+        reader.close();
+        return map;
+    }
+
+    private static String compareValues(String valueA, String valueB) {
+        if (valueA.equals(valueB)) {
+            return "equal";
+        } else {
+            return "not equal";
+        }
+    }
+
+    private static String getFileName(String filePath) {
+        return filePath.substring(filePath.lastIndexOf('/') + 1, filePath.lastIndexOf('.'));
+    }
+}
