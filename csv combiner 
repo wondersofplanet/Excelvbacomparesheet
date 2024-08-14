@@ -1,0 +1,61 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+public class CsvMerger {
+
+    public static void main(String[] args) {
+        String csvAPath = "path/to/csvA.csv";
+        String csvBPath = "path/to/csvB.csv";
+        String outputCsvPath = "path/to/output.csv";
+
+        try {
+            Map<String, String> csvAMap = readCsvIntoMap(csvAPath);
+            Map<String, String> csvBMap = readCsvIntoMap(csvBPath);
+
+            BufferedWriter writer = new BufferedWriter(new FileWriter(outputCsvPath));
+            writer.write("Name,incsvA,incsvB");
+            writer.newLine();
+
+            // Merge csvA and csvB
+            for (String key : csvAMap.keySet()) {
+                writer.write(key + "," + csvAMap.get(key) + "," + csvBMap.getOrDefault(key, "doesnotexist"));
+                writer.newLine();
+            }
+
+            // Add remaining items from csvB
+            for (String key : csvBMap.keySet()) {
+                if (!csvAMap.containsKey(key)) {
+                    writer.write(key + ",doesnotexist," + csvBMap.get(key));
+                    writer.newLine();
+                }
+            }
+
+            writer.close();
+            System.out.println("CSV merged successfully!");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static Map<String, String> readCsvIntoMap(String csvPath) throws IOException {
+        Map<String, String> map = new HashMap<>();
+        BufferedReader reader = new BufferedReader(new FileReader(csvPath));
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(",");
+            if (parts.length == 2) {
+                map.put(parts[0].trim(), parts[1].trim());
+            }
+        }
+
+        reader.close();
+        return map;
+    }
+}
