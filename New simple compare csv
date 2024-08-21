@@ -1,0 +1,48 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
+public class CsvRowComparer {
+    public static void main(String[] args) {
+        String csvFile1 = "path/to/csv1.csv";
+        String csvFile2 = "path/to/csv2.csv";
+
+        Set<String> csv2Rows = new HashSet<>();
+        int csv2LineCount = 0;  // To count the number of lines in CSV 2
+
+        // Read CSV 2 and store rows in a set
+        try (BufferedReader br = new BufferedReader(new FileReader(csvFile2))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                csv2Rows.add(line.trim());  // Add each row from CSV 2 to the set
+                csv2LineCount++;
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading CSV file 2: " + e.getMessage());
+        }
+
+        int csv1LineCount = 0;  // To count the number of lines in CSV 1
+
+        // Read CSV 1 and compare rows
+        try (BufferedReader br = new BufferedReader(new FileReader(csvFile1))) {
+            String line;
+            int lineNumber = 1;
+            while ((line = br.readLine()) != null) {
+                String trimmedLine = line.trim();
+                if (!csv2Rows.contains(trimmedLine)) {
+                    System.out.println(lineNumber + ") Row from CSV 1 not found in CSV 2: " + trimmedLine);
+                }
+                lineNumber++;
+                csv1LineCount++;
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading CSV file 1: " + e.getMessage());
+        }
+
+        // Print the total count of lines in each CSV file
+        System.out.println("\nTotal lines in CSV 1: " + csv1LineCount);
+        System.out.println("Total lines in CSV 2: " + csv2LineCount);
+    }
+}
