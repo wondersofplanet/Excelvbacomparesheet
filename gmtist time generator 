@@ -1,0 +1,35 @@
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+
+public class TimeZoneExample {
+
+    public static void main(String[] args) {
+        // Define the date-time format
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss.SSS z");
+
+        // Get the current time in different time zones
+        ZonedDateTime currentTimeIST = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
+        ZonedDateTime currentTimeGMT = ZonedDateTime.now(ZoneId.of("GMT"));
+        ZonedDateTime currentTimeHKT = ZonedDateTime.now(ZoneId.of("Asia/Hong_Kong"));
+
+        // Subtract 1 day, 2 hours, 5 minutes, and 10 seconds
+        ZonedDateTime adjustedTimeIST = currentTimeIST.minusDays(1).minusHours(2).minusMinutes(5).minusSeconds(10);
+        ZonedDateTime adjustedTimeGMT = currentTimeGMT.minusDays(1).minusHours(2).minusMinutes(5).minusSeconds(10);
+        ZonedDateTime adjustedTimeHKT = currentTimeHKT.minusDays(1).minusHours(2).minusMinutes(5).minusSeconds(10);
+
+        // Print the current time for each time zone
+        System.out.println("Current Time:");
+        System.out.println(currentTimeIST.format(formatter));
+        System.out.println(currentTimeGMT.format(formatter));
+        System.out.println(currentTimeHKT.format(formatter));
+
+        // Print the adjusted time for each time zone
+        System.out.println("\nAdjusted Time (Current Time - 1 Day, 2 Hours, 5 Minutes, 10 Seconds):");
+        System.out.println(adjustedTimeIST.format(formatter));
+        System.out.println(adjustedTimeGMT.format(formatter));
+        System.out.println(adjustedTimeHKT.format(formatter));
+    }
+}
