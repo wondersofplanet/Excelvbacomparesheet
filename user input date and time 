@@ -2,6 +2,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 public class TimeZoneExample {
 
@@ -13,30 +14,35 @@ public class TimeZoneExample {
         // Hardcoded input for IST date and time (12-hour format with AM/PM)
         String inputDateTime = "23 08 2024 03 30 00 PM";  // Example date and time: 23 August 2024, 03:30:00 PM
 
-        // Parse the input date and time
-        LocalDateTime inputLocalDateTime = LocalDateTime.parse(inputDateTime, inputFormatter);
-        ZonedDateTime inputTimeIST = ZonedDateTime.of(inputLocalDateTime, ZoneId.of("Asia/Kolkata"));
+        try {
+            // Parse the input date and time in IST
+            LocalDateTime inputLocalDateTime = LocalDateTime.parse(inputDateTime, inputFormatter);
+            ZonedDateTime inputTimeIST = ZonedDateTime.of(inputLocalDateTime, ZoneId.of("Asia/Kolkata"));
 
-        // Get the current time in different time zones
-        ZonedDateTime currentTimeIST = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
-        ZonedDateTime currentTimeGMT = ZonedDateTime.now(ZoneId.of("GMT"));
-        ZonedDateTime currentTimeHKT = ZonedDateTime.now(ZoneId.of("Asia/Hong_Kong"));
+            // Get the current time in different time zones
+            ZonedDateTime currentTimeIST = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
+            ZonedDateTime currentTimeGMT = ZonedDateTime.now(ZoneId.of("GMT"));
+            ZonedDateTime currentTimeHKT = ZonedDateTime.now(ZoneId.of("Asia/Hong_Kong"));
 
-        // Subtract 1 day, 2 hours, 5 minutes, and 10 seconds from the input time
-        ZonedDateTime adjustedTimeIST = inputTimeIST.minusDays(1).minusHours(2).minusMinutes(5).minusSeconds(10);
-        ZonedDateTime adjustedTimeGMT = currentTimeGMT.minusDays(1).minusHours(2).minusMinutes(5).minusSeconds(10);
-        ZonedDateTime adjustedTimeHKT = currentTimeHKT.minusDays(1).minusHours(2).minusMinutes(5).minusSeconds(10);
+            // Subtract 1 day, 2 hours, 5 minutes, and 10 seconds from the input time
+            ZonedDateTime adjustedTimeIST = inputTimeIST.minusDays(1).minusHours(2).minusMinutes(5).minusSeconds(10);
+            ZonedDateTime adjustedTimeGMT = currentTimeGMT.minusDays(1).minusHours(2).minusMinutes(5).minusSeconds(10);
+            ZonedDateTime adjustedTimeHKT = currentTimeHKT.minusDays(1).minusHours(2).minusMinutes(5).minusSeconds(10);
 
-        // Print the current time for each time zone
-        System.out.println("Current Time:");
-        System.out.println(currentTimeIST.format(formatter));
-        System.out.println(currentTimeGMT.format(formatter));
-        System.out.println(currentTimeHKT.format(formatter));
+            // Print the current time for each time zone
+            System.out.println("Current Time:");
+            System.out.println(currentTimeIST.format(formatter));
+            System.out.println(currentTimeGMT.format(formatter));
+            System.out.println(currentTimeHKT.format(formatter));
 
-        // Print the adjusted time for each time zone
-        System.out.println("\nAdjusted Time (Input Time - 1 Day, 2 Hours, 5 Minutes, 10 Seconds):");
-        System.out.println(adjustedTimeIST.format(formatter));
-        System.out.println(adjustedTimeGMT.format(formatter));
-        System.out.println(adjustedTimeHKT.format(formatter));
+            // Print the adjusted time for each time zone
+            System.out.println("\nAdjusted Time (Input Time - 1 Day, 2 Hours, 5 Minutes, 10 Seconds):");
+            System.out.println(adjustedTimeIST.format(formatter));
+            System.out.println(adjustedTimeGMT.format(formatter));
+            System.out.println(adjustedTimeHKT.format(formatter));
+
+        } catch (DateTimeParseException e) {
+            System.out.println("Error parsing date-time: " + e.getMessage());
+        }
     }
 }
