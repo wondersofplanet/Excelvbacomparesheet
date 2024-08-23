@@ -59,4 +59,8 @@ ORDER BY
 
 However, the procedural approach (first query) is more dynamic, as it can loop over all tables and execute the count for each one.
 
-
+Hkt to gmt
+SELECT
+    your_timestamp_column AT TIME ZONE 'Asia/Hong_Kong' AT TIME ZONE 'GMT' AS gmt_time
+FROM
+    your_table;
