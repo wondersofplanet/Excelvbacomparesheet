@@ -7,15 +7,16 @@ import java.time.format.DateTimeParseException;
 public class TimeZoneExample {
 
     public static void main(String[] args) {
-        // Define the date-time format
+        // Define the date-time format for output
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss.SSS z");
+        // Define the date-time format for input (12-hour clock with AM/PM)
         DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd MM yyyy hh mm ss a");
 
         // Hardcoded input for IST date and time (12-hour format with AM/PM)
         String inputDateTime = "23 08 2024 03 30 00 PM";  // Example date and time: 23 August 2024, 03:30:00 PM
 
         try {
-            // Parse the input date and time in IST
+            // Attempt to parse the input date and time
             LocalDateTime inputLocalDateTime = LocalDateTime.parse(inputDateTime, inputFormatter);
             ZonedDateTime inputTimeIST = ZonedDateTime.of(inputLocalDateTime, ZoneId.of("Asia/Kolkata"));
 
@@ -43,6 +44,7 @@ public class TimeZoneExample {
 
         } catch (DateTimeParseException e) {
             System.out.println("Error parsing date-time: " + e.getMessage());
+            e.printStackTrace();  // Print stack trace for more details
         }
     }
 }
