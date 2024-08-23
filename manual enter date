@@ -1,0 +1,35 @@
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
+public class ZonedDateTimeExample {
+    public static void main(String[] args) {
+        // Define your specific date, time, hour, and second
+        int year = 2024;
+        int month = 8;
+        int day = 23;
+        int hour = 14; // 2 PM
+        int minute = 30;
+        int second = 15;
+
+        // Create LocalDateTime with the specified date and time
+        LocalDateTime localDateTime = LocalDateTime.of(year, month, day, hour, minute, second);
+
+        // Define the time zone
+        ZoneId zoneId = ZoneId.of("Asia/Kolkata"); // Change to your desired time zone
+
+        // Create ZonedDateTime using LocalDateTime and ZoneId
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, zoneId);
+
+        // Convert to GMT (UTC)
+        ZonedDateTime gmtZonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.of("GMT"));
+
+        // Define a formatter for the output
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
+
+        // Print the results
+        System.out.println("Original ZonedDateTime: " + zonedDateTime.format(formatter));
+        System.out.println("GMT ZonedDateTime: " + gmtZonedDateTime.format(formatter));
+    }
+}
