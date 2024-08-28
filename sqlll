@@ -1,0 +1,4 @@
+SELECT 
+    substring(your_column FROM '"name"(.*?)"here"') AS extracted_substring
+FROM 
+    your_table;
