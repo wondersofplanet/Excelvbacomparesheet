@@ -1,0 +1,32 @@
+SELECT 
+    your_column_name,
+    CASE
+        WHEN (xpath('/*', your_column_name::xml) IS NOT NULL) THEN
+            xmlelement(name root, xmlserialize(document your_column_name::xml as text))
+        ELSE NULL
+    END AS formatted_xml
+FROM 
+    your_table_name;
+
+
+
+Explanation
+
+
+xpath('/*', your_column_name::xml): Checks if the content is valid XML. The xpath function returns an array of XML elements that match the given XPath query. If the content is not valid XML, this function will raise an error.xmlelement(name root, xmlserialize(document your_column_name::xml as text)): Formats the XML content. The xmlserialize function converts XML to text, and xmlelement adds a root element to ensure that the XML is well-formed.CASE WHEN ... ELSE NULL: Handles cases where the data is not valid XML, returning NULL instead of raising an error.Alternative ApproachIf you want to ensure that invalid XML data doesn't cause errors, you can use a safer approach with a subquery to handle XML formatting:SELECT 
+    your_column_name,
+    CASE
+        WHEN (
+            -- Ensure it’s valid XML by attempting to cast
+            your_column_name::xml IS NOT NULL
+            AND xpath('/*', your_column_name::xml) IS NOT NULL
+        ) THEN
+            -- Pretty-print the XML
+            xmlelement(name root, xmlserialize(document your_column_name::xml as text))
+        ELSE NULL
+    END AS formatted_xml
+FROM 
+    your_table_name;
+
+
+In this query:your_column_name::xml: Casts the column data to XML. If the content is not valid XML, it will raise an error.xpath('/*', your_column_name::xml): Ensures that the XML data is correctly formatted.xmlelement(name root, xmlserialize(document your_column_name::xml as text)): Converts and formats the XML data for readability.
