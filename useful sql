@@ -1,0 +1,15 @@
+SELECT 
+    your_column_name,
+    COALESCE(
+        CASE
+            WHEN (your_column_name::jsonb IS NOT NULL AND jsonb_typeof(your_column_name::jsonb) IS NOT NULL)
+            THEN jsonb_pretty(your_column_name::jsonb)
+            ELSE NULL
+        END,
+        NULL
+    ) AS formatted_json
+FROM 
+    your_table_name;
+
+
+This query will provide a formatted_json column with pretty-printed JSON or NULL if the data is not valid JSON.
