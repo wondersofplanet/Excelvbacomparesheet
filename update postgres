@@ -1,0 +1,105 @@
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class PostgresToCSV {
+
+    // Connection parameters
+    private static final String HOST = "localhost"; // Replace with your host
+    private static final String PORT = "5432";      // Replace with your port number
+    private static final String DATABASE = "your_database";  // Replace with your database name
+    private static final String USER = "your_username";  // Replace with your username
+    private static final String PASS = "your_password";  // Replace with your password
+
+    // Hardcoded table names
+    private static final String[] TABLES = {"table1", "table2", "table3"}; // Replace with your table names
+
+    public static void main(String[] args) {
+        Connection connection = null;
+        Statement statement = null;
+
+        try {
+            // Load the PostgreSQL JDBC Driver
+            Class.forName("org.postgresql.Driver");
+
+            // Build the PostgreSQL connection URL dynamically
+            String dbUrl = "jdbc:postgresql://" + HOST + ":" + PORT + "/" + DATABASE;
+
+            // Open connection to the PostgreSQL database
+            connection = DriverManager.getConnection(dbUrl, USER, PASS);
+
+            // Loop through each table name
+            for (String table : TABLES) {
+                System.out.println("Downloading data from table: " + table);
+
+                // Create a statement to execute the query
+                statement = connection.createStatement();
+                
+                // Query to get all rows from the table
+                String query = "SELECT * FROM " + table;
+                ResultSet resultSet = statement.executeQuery(query);
+                
+                // Query to count the number of rows in the table
+                String countQuery = "SELECT COUNT(*) FROM " + table;
+                ResultSet countResult = statement.executeQuery(countQuery);
+                int rowCount = 0;
+                
+                if (countResult.next()) {
+                    rowCount = countResult.getInt(1); // Get the row count
+                }
+
+                // Generate the CSV file name based on the table name and row count
+                String fileName = table + "_countofrows_" + rowCount + ".csv";
+
+                // Get table data and write to CSV
+                writeToCSV(resultSet, fileName);
+
+                System.out.println("Data saved to " + fileName);
+            }
+
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            // Close the resources
+            try {
+                if (statement != null) statement.close();
+                if (connection != null) connection.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }
+    }
+
+    // Write the ResultSet data to a CSV file
+    private static void writeToCSV(ResultSet resultSet, String fileName) throws SQLException {
+        try (FileWriter fileWriter = new FileWriter(fileName)) {
+            int columnCount = resultSet.getMetaData().getColumnCount();
+
+            // Write the column headers
+            for (int i = 1; i <= columnCount; i++) {
+                fileWriter.append(resultSet.getMetaData().getColumnName(i));
+                if (i < columnCount) {
+                    fileWriter.append(",");
+                }
+            }
+            fileWriter.append("\n");
+
+            // Write the rows
+            while (resultSet.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    fileWriter.append(resultSet.getString(i));
+                    if (i < columnCount) {
+                        fileWriter.append(",");
+                    }
+                }
+                fileWriter.append("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
