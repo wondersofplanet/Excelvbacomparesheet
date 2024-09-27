@@ -1,1 +1,5 @@
 =TEXTJOIN(", ", TRUE, CHAR(34)&A1:INDEX(A:A, COUNTA(A:A))&CHAR(34))
+
+
+
+= "{" & TEXTJOIN(", ", TRUE, """cow." & A1:INDEX(A:A, COUNTA(A:A)) & """") & "}"
